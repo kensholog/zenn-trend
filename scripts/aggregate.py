@@ -118,6 +118,7 @@ def enrich(arts, users):
             past = ((u.get("total_liked_count") or 0) - (r.get("liked_count") or 0)) / max(u["articles_count"] - 1, 1)
             r["author_avg"] = past
             r["follower_count"] = u.get("follower_count")
+            r["articles_count"] = u.get("articles_count")
         else:
             r["author_avg"] = None
         r["author_bin"] = bin_of(AUTHOR_BINS, r["author_avg"])

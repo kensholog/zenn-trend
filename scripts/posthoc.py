@@ -122,9 +122,66 @@ def main():
         out.append(f"| {name} | {len(e)} | {ag.fmt(ag.rate(e, 'liked_count', 10))} | {ag.fmt(ag.rate(e, 'liked_count', 5))} | {len(l_)} | {ag.fmt(ag.rate(l_, 'liked_count', 10))} | {ag.fmt(ag.rate(l_, 'liked_count', 5))} | {ag.fmt(pub)} |")
     out.append("")
 
+    # P5: what "実績" stands for — follower count vs past-average-like, late period, targets pooled
+    out.append("## P5 「実績」の中身: フォロワー数 × 過去平均いいね（対象合算、後期 m=6〜11、R10）\n")
+    FOLLOWER_BINS = [("0", lambda x: x == 0), ("1-9", lambda x: 1 <= x < 10), ("10-99", lambda x: 10 <= x < 100),
+                     ("100-999", lambda x: 100 <= x < 1000), (">=1000", lambda x: x >= 1000)]
+    for r in late:
+        r["follower_bin"] = bin_of_f(FOLLOWER_BINS, r.get("follower_count"))
+    cols = [n for n, _ in ag.AUTHOR_BINS]
+    out.append("| フォロワー数 \\ 過去平均いいね | " + " | ".join(cols) + " | 行計 |\n|---|" + "---|" * (len(cols) + 1))
+    for fb, _ in FOLLOWER_BINS:
+        row = [r for r in late if r["follower_bin"] == fb]
+        cells = []
+        for ab in cols:
+            c = [r for r in row if r["author_bin"] == ab]
+            cells.append(f"{ag.fmt(ag.rate(c, 'liked_count', 10))} (n={len(c)})" if c else "—")
+        out.append(f"| {fb} | " + " | ".join(cells) + f" | {ag.fmt(ag.rate(row, 'liked_count', 10))} (n={len(row)}) |")
+    out.append("")
+
+    # P6: Publication vs individual within author stratum, late period
+    out.append("## P6 Publication 所属 × 過去平均いいね（対象合算、後期、R10）\n")
+    out.append("| 過去平均いいね | 個人 n | 個人 R10 | Publication n | Publication R10 |\n|---|---|---|---|---|")
+    for ab in cols:
+        ind = [r for r in late if r["author_bin"] == ab and not r["is_pub"]]
+        pub = [r for r in late if r["author_bin"] == ab and r["is_pub"]]
+        out.append(f"| {ab} | {len(ind)} | {ag.fmt(ag.rate(ind, 'liked_count', 10))} | {len(pub)} | {ag.fmt(ag.rate(pub, 'liked_count', 10))} |")
+    out.append("")
+
+    # P7: first-timers (articles_count == 1 at fetch) among newcomers, late period
+    out.append("## P7 新参層の内訳: 取得時点の記事数（対象合算、後期、<1 層）\n")
+    out.append("| 取得時点の記事数 | n | R10 | R5 | R1 |\n|---|---|---|---|---|")
+    new_late = [r for r in late if r["author_bin"] == "<1"]
+    ARTICLE_BINS = [("1", lambda x: x == 1), ("2-4", lambda x: 2 <= x < 5), ("5-19", lambda x: 5 <= x < 20), (">=20", lambda x: x >= 20)]
+    for nb, f in ARTICLE_BINS:
+        c = [r for r in new_late if r.get("articles_count") is not None and f(r["articles_count"])]
+        out.append(f"| {nb} | {len(c)} | {ag.fmt(ag.rate(c, 'liked_count', 10))} | {ag.fmt(ag.rate(c, 'liked_count', 5))} | {ag.fmt(ag.rate(c, 'liked_count', 1))} |")
+    out.append("")
+
+    # P8: first-timers (articles_count == 1) by Publication x follower count, late period
+    out.append("## P8 初投稿（取得時点の記事数 1）の内訳: Publication × フォロワー数（対象合算、後期、R10 / R5）\n")
+    out.append("| 所属 | フォロワー 0 | フォロワー 1〜9 | フォロワー 10 以上 |\n|---|---|---|---|")
+    ft = [r for r in new_late if r.get("articles_count") == 1]
+    for pub, label in ((False, "個人"), (True, "Publication")):
+        cells = []
+        for fb, f in (("0", lambda x: x == 0), ("1-9", lambda x: 1 <= x < 10), (">=10", lambda x: x >= 10)):
+            c = [r for r in ft if r["is_pub"] == pub and r.get("follower_count") is not None and f(r["follower_count"])]
+            cells.append(f"{ag.fmt(ag.rate(c, 'liked_count', 10))} / {ag.fmt(ag.rate(c, 'liked_count', 5))} (n={len(c)})" if c else "—")
+        out.append(f"| {label} | " + " | ".join(cells) + " |")
+    out.append("")
+
     text = "\n".join(out)
     (ROOT / "docs" / "results_posthoc.md").write_text(text, encoding="utf-8")
     print(text)
+
+
+def bin_of_f(bins, x):
+    if x is None:
+        return "unknown"
+    for name, f in bins:
+        if f(x):
+            return name
+    return "unknown"
 
 
 if __name__ == "__main__":

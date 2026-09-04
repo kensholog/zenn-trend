@@ -19,7 +19,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", line_buffering=True)
 ROOT = Path(__file__).resolve().parent.parent
 UA = "Mozilla/5.0 (personal research on Zenn trends; hourly; 1 req/s; contact via zenn.dev/kensholog)"
 JST = timezone(timedelta(hours=9))

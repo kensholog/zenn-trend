@@ -15,7 +15,7 @@ import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", line_buffering=True)
 ROOT = Path(__file__).resolve().parent.parent
 TOPICS = ROOT / "data" / "topics"
 OUT = ROOT / "data" / "users.jsonl"

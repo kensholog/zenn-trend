@@ -19,7 +19,7 @@ import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", line_buffering=True)
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "topics"
 UA = "Mozilla/5.0 (personal research on Zenn topics; 1 req/s; contact via zenn.dev/kensholog)"

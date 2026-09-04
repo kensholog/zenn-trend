@@ -1,0 +1,31 @@
+# 取得した生データ（トピック一覧・著者の JSONL）。公開するのは docs/ の集計だけ
+# ルート直下の data/ だけを除外する（docs/data/ の集計 CSV、trend_feed/ と latest_feed/ の定点収集は公開する）
+/data/
+*.db
+*.parquet
+*.csv
+!docs/**/*.csv
+
+# 非公開の備忘（正本は zenn-content/ideas/ にある。ここは junction）
+ideas/
+
+# 認証情報
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

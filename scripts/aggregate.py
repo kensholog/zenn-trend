@@ -269,6 +269,7 @@ def main():
         ctrl_by_month[r["month"]].append(r)
     out.append("| 対象 | 誕生月 | 早期の暦月 | 対照 早期 n | 対照 早期 R10 | 対照 後期 n | 対照 後期 R10 | 対照の比 | 対象の比（R10、粗） |\n|---|---|---|---|---|---|---|---|---|")
     num, den = 0.0, 0
+    b3_rows = []
     for t in targets:
         b = month_index(prof[t]["birth"])
         ce = [r for m in EARLY for r in ctrl_by_month.get(month_from_index(b + m), [])]
@@ -282,7 +283,15 @@ def main():
         if cr is not None:
             num += len(tl) * cr
             den += len(tl)
+        b3_rows.append({"topic": t, "birth": prof[t]["birth"], "tgt_early_n": len(te), "tgt_early_R10": rte, "tgt_late_n": len(tl),
+                        "tgt_late_R10": rtl, "tgt_ratio": tr, "ctrl_early_n": len(ce), "ctrl_early_R10": rce, "ctrl_late_n": len(cl),
+                        "ctrl_late_R10": rcl, "ctrl_ratio": cr})
         out.append(f"| {t} | {prof[t]['birth']} | {month_from_index(b)}〜{month_from_index(b + 2)} | {len(ce)} | {fmt(rce)} | {len(cl)} | {fmt(rcl)} | {fmt(cr, False)} | {fmt(tr, False)} |")
+    (ROOT / "docs" / "data").mkdir(parents=True, exist_ok=True)
+    with open(ROOT / "docs" / "data" / "b3_topics.csv", "w", encoding="utf-8", newline="") as f:
+        wri = csv.DictWriter(f, fieldnames=list(b3_rows[0].keys()))
+        wri.writeheader()
+        wri.writerows(b3_rows)
     b3 = num / den if den else None
     did = (b1[10][0] / b3) if (b1[10][0] is not None and b3) else None
     out.append(f"\n- 対照の比（後期本数で加重）: **{fmt(b3, False)}**。B1 ÷ B3 = **{fmt(did, False)}** → " + ("age 効果では説明できない" if (did or 0) >= 1.5 else "**age 効果と区別できない**（必ず明記）") + "\n")

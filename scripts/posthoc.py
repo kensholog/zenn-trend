@@ -113,13 +113,20 @@ def main():
     out.append("| 著者層 | 早期 n | 早期 R10 | 早期 R5 | 後期 n | 後期 R10 | 後期 R5 | Publication 率（後期） |\n|---|---|---|---|---|---|---|---|")
     early = [r for r in tg if r.get("m") in ag.EARLY]
     late = [r for r in tg if r.get("m") in ag.LATE]
+    p4_rows = []
     for name, _ in ag.AUTHOR_BINS + [("unknown", None)]:
         e = [r for r in early if r["author_bin"] == name]
         l_ = [r for r in late if r["author_bin"] == name]
         if not e and not l_:
             continue
         pub = (sum(1 for r in l_ if r["is_pub"]) / len(l_)) if l_ else None
+        p4_rows.append({"author_bin": name, "early_n": len(e), "early_R10": ag.rate(e, "liked_count", 10), "early_R5": ag.rate(e, "liked_count", 5),
+                        "late_n": len(l_), "late_R10": ag.rate(l_, "liked_count", 10), "late_R5": ag.rate(l_, "liked_count", 5), "late_pub_share": pub})
         out.append(f"| {name} | {len(e)} | {ag.fmt(ag.rate(e, 'liked_count', 10))} | {ag.fmt(ag.rate(e, 'liked_count', 5))} | {len(l_)} | {ag.fmt(ag.rate(l_, 'liked_count', 10))} | {ag.fmt(ag.rate(l_, 'liked_count', 5))} | {ag.fmt(pub)} |")
+    with open(ROOT / "docs" / "data" / "posthoc_author_strata.csv", "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(p4_rows[0].keys()))
+        w.writeheader()
+        w.writerows(p4_rows)
     out.append("")
 
     # P5: what "実績" stands for — follower count vs past-average-like, late period, targets pooled
@@ -162,12 +169,18 @@ def main():
     out.append("## P8 初投稿（取得時点の記事数 1）の内訳: Publication × フォロワー数（対象合算、後期、R10 / R5）\n")
     out.append("| 所属 | フォロワー 0 | フォロワー 1〜9 | フォロワー 10 以上 |\n|---|---|---|---|")
     ft = [r for r in new_late if r.get("articles_count") == 1]
+    p8_rows = []
     for pub, label in ((False, "個人"), (True, "Publication")):
         cells = []
         for fb, f in (("0", lambda x: x == 0), ("1-9", lambda x: 1 <= x < 10), (">=10", lambda x: x >= 10)):
             c = [r for r in ft if r["is_pub"] == pub and r.get("follower_count") is not None and f(r["follower_count"])]
+            p8_rows.append({"publication": label, "follower_bin": fb, "n": len(c), "R10": ag.rate(c, "liked_count", 10), "R5": ag.rate(c, "liked_count", 5)})
             cells.append(f"{ag.fmt(ag.rate(c, 'liked_count', 10))} / {ag.fmt(ag.rate(c, 'liked_count', 5))} (n={len(c)})" if c else "—")
         out.append(f"| {label} | " + " | ".join(cells) + " |")
+    with open(ROOT / "docs" / "data" / "posthoc_first_timers.csv", "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(p8_rows[0].keys()))
+        w.writeheader()
+        w.writerows(p8_rows)
     out.append("")
 
     text = "\n".join(out)

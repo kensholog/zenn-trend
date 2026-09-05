@@ -15,9 +15,8 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", line_buffering=True)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import aggregate as ag  # noqa: E402  (topic-side helpers; it re-wraps stdout too, harmless)
+import aggregate as ag  # noqa: E402  (topic-side helpers; it also re-wraps stdout as UTF-8, so do not wrap again here)
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"

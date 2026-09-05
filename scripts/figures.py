@@ -53,6 +53,7 @@ ax.set_xlabel("いいね 10 到達率の比: 誕生 0〜2 ヶ月目 ÷ 6〜11 �
 ax.set_xscale("log")
 ax.set_xticks([0.5, 1, 1.5, 2, 3, 4, 6])
 ax.set_xticklabels(["0.5", "1", "1.5", "2", "3", "4", "6"])
+ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 ax.set_title("早期の記事は伸びて見えるが、成熟トピックの同じ暦月でも同じだけ伸びて見える\n（対象 17 トピック合算: 1.40、対照: 1.44。集計 2026-09-04）", fontsize=10.5)
 ax.legend(loc="lower right", fontsize=9)
 ax.grid(axis="x", alpha=0.3)

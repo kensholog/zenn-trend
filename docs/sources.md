@@ -19,6 +19,15 @@
 | 公式 RSS: `zenn.dev/feed` = 「現在Zennでトレンドとなっている投稿のRSSフィードです」（2026-09-04 に 20 件）。トピック別 `zenn.dev/topics/{name}/feed`、ユーザー別 `zenn.dev/{user}/feed?all=1` | https://zenn.dev/zenn/articles/zenn-feed-rss（Zenn 公式 2020-09-29）、実測 |
 | トレンドの算出は「記事の鮮度」「アクセスの流入元」「文字数あたりの滞在時間」を使う（外部から再現できない） | https://github.com/zenn-dev/zenn-community/issues/9（2020-09-18） |
 
+## はてなブックマーク件数取得 API（確認日 2026-09-04）
+
+| 事実 | 出典 |
+|---|---|
+| `https://bookmark.hatenaapis.com/count/entries?url=…&url=…`。1 リクエストに指定できる url は 50 まで（超過は 414）。認証不要。返却は `{"URL": 件数}` の JSON | https://developer.hatena.ne.jp/ja/documents/bookmark/apis/getcount |
+| 明示のレート上限は無い。「過度なリクエストはサーバーの過負荷ならびにサービスのレスポンス低下に繋がりますので、繰り返しリクエストされる場合は、リクエスト毎に数秒の間隔をあけていただくなど、サーバーリソースの節約にご協力ください」 → 本プロジェクトは 3 秒間隔 | 同上 |
+| 著者ごとの記事一覧 `zenn.dev/api/articles?username=…&order=latest&count=48` は next_page が null まで全件返る（myoshida2: 6 ページ、最古 2024-05-17）。フィールドは topicname 一覧と同じ | 実測 2026-09-04 |
+| ユーザー API に `created_at` は無い（17,943 人すべて空） | 実測 2026-09-04 |
+
 ## 先行分析（本文を読んだ。詳細は非公開備忘）
 
 | 記事 | 要点 |

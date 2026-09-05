@@ -28,11 +28,13 @@ jobs:
           python-version: "3.12"
       - name: Fetch
         run: python scripts/fetch_trend_feed.py
+      - name: Own metrics (3 requests; public numbers of the account's own articles)
+        run: python scripts/fetch_own_metrics.py kensholog || echo "own metrics failed (non-fatal)"
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add trend_feed latest_feed
+          git add trend_feed latest_feed own_metrics
           if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
           git commit -m "data: trend feed $(date -u +%Y-%m-%dT%H:%MZ)"
           git pull --rebase

@@ -54,6 +54,7 @@ def main():
     byq = defaultdict(list)
     for a in p1:
         byq[aq.quarter(a["rows"][0]["published_at"])].append(a)
+    q_rows = []
     for q in sorted(byq):
         if q < "2023Q1":
             continue
@@ -63,7 +64,12 @@ def main():
         h = sum(1 for a in g if a["k0"] == 1) / len(g)
         hi = sum(1 for a in ind if a["k0"] == 1) / len(ind) if ind else None
         hp = sum(1 for a in pub if a["k0"] == 1) / len(pub) if pub else None
+        q_rows.append({"quarter": q, "authors": len(g), "h1_all": h, "n_ind": len(ind), "h1_ind": hi, "n_pub": len(pub), "h1_pub": hp})
         out.append(f"| {q} | {len(g):,} | {aq.fmt(h)} | {aq.fmt(hi)} | {aq.fmt(hp)} |")
+    with open(ROOT / "docs" / "data" / "q_posthoc_h1_by_quarter.csv", "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(q_rows[0].keys()))
+        w.writeheader()
+        w.writerows(q_rows)
     out.append("")
 
     out.append("## PQ3 持ち越しのプラセボ比較（同じ R5 で、初ヒット前と後）\n")
@@ -73,6 +79,13 @@ def main():
     out.append(f"- 初ヒット**前** 3 本の R5: 処置群 {aq.fmt(pb[0])} ÷ 対照 {aq.fmt(pb[2])} = **{aq.fmt(before_ratio, False)}**")
     out.append(f"- 初ヒット**後** 3 本の R5（四半期で層別）: 処置群 {aq.fmt(sub_after['treated_R'])} ÷ 対照 {aq.fmt(sub_after['control_R'])} = **{aq.fmt(sub_after['ratio'], False)}**")
     out.append(f"- 後 ÷ 前 = **{aq.fmt(sub_after['ratio'] / before_ratio if (sub_after['ratio'] and before_ratio) else None, False)}**（1 を超えなければ、ヒットそのものが次の記事を押し上げた証拠は無い）\n")
+    main_after = aq.carryover(p1, aq.HIT, True)
+    with open(ROOT / "docs" / "data" / "q_posthoc_placebo.csv", "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["window", "metric", "treated_R", "treated_articles", "control_R", "control_articles", "ratio"])
+        w.writeheader()
+        w.writerow({"window": "before(k0-3..k0-1)", "metric": "R5", "treated_R": pb[0], "treated_articles": pb[1], "control_R": pb[2], "control_articles": pb[3], "ratio": before_ratio})
+        w.writerow({"window": "after(k0+1..k0+3)", "metric": "R5", "treated_R": sub_after["treated_R"], "treated_articles": sub_after["treated_articles"], "control_R": sub_after["control_R"], "control_articles": sub_after["control_articles"], "ratio": sub_after["ratio"]})
+        w.writerow({"window": "after(k0+1..k0+3)", "metric": "R10", "treated_R": main_after["treated_R"], "treated_articles": main_after["treated_articles"], "control_R": main_after["control_R"], "control_articles": main_after["control_articles"], "ratio": main_after["ratio"]})
 
     text = "\n".join(out)
     (ROOT / "docs" / "results_q_posthoc.md").write_text(text, encoding="utf-8")

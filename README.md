@@ -17,7 +17,7 @@ Zenn の公開データで「**新しいツールのトピックでは、最初�
 | [docs/results.md](docs/results.md) | 事前登録の集計結果（撤退基準の判定、B1〜B5）。`scripts/aggregate.py` が生成 |
 | [docs/results_posthoc.md](docs/results_posthoc.md) | 事後の参考表（対照の新参層、暦四半期の推移、経過月ごとの合算、著者層別）。判定には使わない |
 | [docs/results_q.md](docs/results_q.md) / [docs/results_q_posthoc.md](docs/results_q_posthoc.md) | 第 2 プロジェクト（Q1 実績はどう溜まるか / Q2 新参のヒットは外から来たか）の集計結果と事後の参考表。`scripts/aggregate_q.py` / `posthoc_q.py` が生成 |
-| [docs/decisions/](docs/decisions/) | 決定記録（0001 問いの採用と撤退基準の凍結、**0002 フェーズ 1〜2 の判定と結論**、0003 第 2 プロジェクトの事前登録、0004 Q1b の定義修正、**0005 第 2 プロジェクトの判定**、0006 C（トレンド入り）の事前登録） |
+| [docs/decisions/](docs/decisions/) | 決定記録（0001 問いの採用と撤退基準の凍結、**0002 フェーズ 1〜2 の判定と結論**、0003 第 2 プロジェクトの事前登録、0004 Q1b の定義修正、**0005 第 2 プロジェクトの判定**、0006 C（トレンド入り）の事前登録、0007 C の実装上の読み方の固定） |
 | [docs/sources.md](docs/sources.md) | 確認済みの事実と出典（API の仕様と規約、先行分析の要点、フェーズ 0 の実測表） |
 | [docs/data/](docs/data/) | 公開する集計 CSV: トピック × 経過月の到達率、暦四半期の到達率、合算の経過月 |
 | [scripts/fetch_topic_articles.py](scripts/fetch_topic_articles.py) | トピック一覧の全ページ取得（1 req/s、再開可）→ `data/topics/*.jsonl` |
@@ -25,6 +25,8 @@ Zenn の公開データで「**新しいツールのトピックでは、最初�
 | [scripts/aggregate.py](scripts/aggregate.py) / [scripts/posthoc.py](scripts/posthoc.py) | 事前登録どおりの集計（`--criteria` で A/B のみ）/ 事後の参考表 |
 | [scripts/fetch_trend_feed.py](scripts/fetch_trend_feed.py) | 公式トレンド RSS と新着 48 本の保存 → `trend_feed/`、`latest_feed/`（GitHub Actions で実行） |
 | [.github/workflows/trend-feed.yml](.github/workflows/trend-feed.yml) | 30 分ごとの cron |
+| [scripts/c_common.py](scripts/c_common.py) / [scripts/fetch_c_authors.py](scripts/fetch_c_authors.py) / [scripts/aggregate_c.py](scripts/aggregate_c.py) | C（decisions/0006）の定義・著者取得・集計。**T_end（2026-10-02 12:10 JST 以降の最初のスナップショット）の前は、取得を拒否し、件数と時刻しか出さない** |
+| [scripts/make_c_fixture.py](scripts/make_c_fixture.py) | 答えの分かっている合成データで `aggregate_c.py` を検証する（`ALL OK` で終了）。C のスクリプトは T_end の前に、合成データだけで検証した（[decisions/0007](docs/decisions/0007-c-implementation-readings.md)） |
 
 - 検証の経緯・備忘は非公開の別リポジトリにある（`ideas/` は junction で、ここには置かない）
 - 前の題材: [meccha-chameleon](https://github.com/kensholog/meccha-chameleon)（Steam レビューで拡散経路を再現）、[funding-arb-jp](https://github.com/kensholog/funding-arb-jp)（撤退済み）

@@ -20,7 +20,7 @@ Zenn の公開データで「**新しいツールのトピックでは、最初�
 | [docs/decisions/](docs/decisions/) | 決定記録（0001 問いの採用と撤退基準の凍結、**0002 フェーズ 1〜2 の判定と結論**、0003 第 2 プロジェクトの事前登録、0004 Q1b の定義修正、**0005 第 2 プロジェクトの判定**、0006 C（トレンド入り）の事前登録、0007 C の実装上の読み方の固定） |
 | [docs/sources.md](docs/sources.md) | 確認済みの事実と出典（API の仕様と規約、先行分析の要点、フェーズ 0 の実測表） |
 | [docs/data/](docs/data/) | 公開する集計 CSV: トピック × 経過月の到達率、暦四半期の到達率、合算の経過月 |
-| [scripts/fetch_topic_articles.py](scripts/fetch_topic_articles.py) | トピック一覧の全ページ取得（1 req/s、再開可）→ `data/topics/*.jsonl` |
+| [scripts/fetch_topic_articles.py](scripts/fetch_topic_articles.py) | トピック一覧の全ページ取得（1 req/s、再開可）→ `data/topics/*.jsonl`。2b の再取得は `--out data/topics_2026-10`（同じトピック・同じ項目を別フォルダへ。フェーズ 1 のファイルは触らない） |
 | [scripts/fetch_users.py](scripts/fetch_users.py) | 一覧に出た著者のユーザー API 取得（1 req/s、再開可）→ `data/users.jsonl` |
 | [scripts/aggregate.py](scripts/aggregate.py) / [scripts/posthoc.py](scripts/posthoc.py) | 事前登録どおりの集計（`--criteria` で A/B のみ）/ 事後の参考表 |
 | [scripts/fetch_trend_feed.py](scripts/fetch_trend_feed.py) | 公式トレンド RSS と新着 48 本の保存 → `trend_feed/`、`latest_feed/`（GitHub Actions で実行） |
@@ -50,7 +50,7 @@ Zenn の公開データで「**新しいツールのトピックでは、最初�
 2. ~~`python scripts/phase1.py`（一覧 約 2,000 リクエスト 35 分 → 著者 17,952 人 5 時間）~~ 2026-09-04 完了
 3. ~~撤退基準 A → B を判定し、B1〜B5 を出す~~ 2026-09-04 完了（[docs/results.md](docs/results.md)、[decisions/0002](docs/decisions/0002-phase1-verdict.md)）
 4. 記事（zenn-content 側で執筆）
-5. 2b: 2026-10-02 以降に同じ一覧を再取得し、age 効果と全体低下を分ける（判定は decisions/0002 に事前登録済み）
+5. 2b: 2026-10-02 以降に同じ一覧を再取得し（`python scripts/fetch_topic_articles.py --out data/topics_2026-10`）、age 効果と全体低下を分ける（判定は decisions/0002 に事前登録済み。2 回の取得を比べる集計は未作成）
 6. C: ~~2 週間分たまる前に問いと基準を登録~~ 2026-09-21 に [decisions/0006](docs/decisions/0006-c-trend-entry-registration.md) で登録（予定から 3 日遅れ、集計は未実施）。2026-10-02 以降に 28 日分で「トレンドには誰が入るか（C1）」「入口はいいね 10 より上か下か（C2）」を判定する
 
 ## 作り方（AI の利用について）

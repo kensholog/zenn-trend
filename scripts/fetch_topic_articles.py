@@ -2,12 +2,16 @@
 
   python scripts/fetch_topic_articles.py            # all topics (new + control), resumable
   python scripts/fetch_topic_articles.py mcp dify   # only these topics
+  python scripts/fetch_topic_articles.py --out data/topics_2026-10   # 2b re-fetch (decisions/0002): same topics, same
+                                                                     # fields, separate folder; phase 1 files stay untouched
 
 Output: data/topics/<topic>.jsonl  (one article per line; listing fields only, no body)
         data/topics_meta.json       (per-topic articlesCount etc. from the topic page)
+        with --out DIR: DIR/<topic>.jsonl and DIR_meta.json (DIR must be under data/, which is not committed)
 Rate:   1 request per second. Stops when next_page is null (hard cap: page 100).
-Resume: a topic with an existing data/topics/<topic>.done marker is skipped.
+Resume: a topic with an existing <topic>.done marker in the output folder is skipped.
 """
+import argparse
 import io
 import json
 import re
@@ -64,10 +68,10 @@ def slim(a):
     }
 
 
-def fetch_topic(topic, meta):
-    OUT.mkdir(parents=True, exist_ok=True)
-    done = OUT / f"{topic}.done"
-    out = OUT / f"{topic}.jsonl"
+def fetch_topic(topic, meta, out_dir=OUT):
+    out_dir.mkdir(parents=True, exist_ok=True)
+    done = out_dir / f"{topic}.done"
+    out = out_dir / f"{topic}.jsonl"
     if done.exists():
         print(f"[skip] {topic} (done)")
         return
@@ -107,12 +111,22 @@ def fetch_topic(topic, meta):
 
 
 def main():
-    topics = sys.argv[1:] or (NEW_TOPICS + CONTROL_TOPICS)
-    meta_path = ROOT / "data" / "topics_meta.json"
+    ap = argparse.ArgumentParser()
+    ap.add_argument("topics", nargs="*", help="only these topics (default: all new + control topics)")
+    ap.add_argument("--out", help="output folder under data/ (default data/topics); the meta file becomes <out>_meta.json")
+    args = ap.parse_args()
+    topics = args.topics or (NEW_TOPICS + CONTROL_TOPICS)
+    out_dir = OUT
+    if args.out:
+        out_dir = (ROOT / args.out).resolve()
+        if (ROOT / "data").resolve() not in out_dir.parents:
+            sys.exit(f"--out must be a folder under data/ (raw listings are never committed): {args.out}")
+    meta_path = out_dir.parent / f"{out_dir.name}_meta.json"
+    print(f"output {out_dir.relative_to(ROOT)}  meta {meta_path.relative_to(ROOT)}  topics {len(topics)}")
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     for t in topics:
         try:
-            fetch_topic(t, meta)
+            fetch_topic(t, meta, out_dir)
         finally:
             meta_path.parent.mkdir(parents=True, exist_ok=True)
             meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")

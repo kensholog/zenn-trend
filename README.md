@@ -17,7 +17,7 @@ Zenn の公開データで「**新しいツールのトピックでは、最初�
 | [docs/results.md](docs/results.md) | 事前登録の集計結果（撤退基準の判定、B1〜B5）。`scripts/aggregate.py` が生成 |
 | [docs/results_posthoc.md](docs/results_posthoc.md) | 事後の参考表（対照の新参層、暦四半期の推移、経過月ごとの合算、著者層別）。判定には使わない |
 | [docs/results_q.md](docs/results_q.md) / [docs/results_q_posthoc.md](docs/results_q_posthoc.md) | 第 2 プロジェクト（Q1 実績はどう溜まるか / Q2 新参のヒットは外から来たか）の集計結果と事後の参考表。`scripts/aggregate_q.py` / `posthoc_q.py` が生成 |
-| [docs/decisions/](docs/decisions/) | 決定記録（0001 問いの採用と撤退基準の凍結、**0002 フェーズ 1〜2 の判定と結論**、0003 第 2 プロジェクトの事前登録、0004 Q1b の定義修正、**0005 第 2 プロジェクトの判定**、0006 C（トレンド入り）の事前登録、0007 C の実装上の読み方の固定） |
+| [docs/decisions/](docs/decisions/) | 決定記録（0001 問いの採用と撤退基準の凍結、**0002 フェーズ 1〜2 の判定と結論**、0003 第 2 プロジェクトの事前登録、0004 Q1b の定義修正、**0005 第 2 プロジェクトの判定**、0006 C（トレンド入り）の事前登録、0007 C の実装上の読み方の固定、0008 2b の実装上の読み方の固定） |
 | [docs/sources.md](docs/sources.md) | 確認済みの事実と出典（API の仕様と規約、先行分析の要点、フェーズ 0 の実測表） |
 | [docs/data/](docs/data/) | 公開する集計 CSV: トピック × 経過月の到達率、暦四半期の到達率、合算の経過月 |
 | [scripts/fetch_topic_articles.py](scripts/fetch_topic_articles.py) | トピック一覧の全ページ取得（1 req/s、再開可）→ `data/topics/*.jsonl`。2b の再取得は `--out data/topics_2026-10`（同じトピック・同じ項目を別フォルダへ。フェーズ 1 のファイルは触らない） |
@@ -26,6 +26,7 @@ Zenn の公開データで「**新しいツールのトピックでは、最初�
 | [scripts/fetch_trend_feed.py](scripts/fetch_trend_feed.py) | 公式トレンド RSS と新着 48 本の保存 → `trend_feed/`、`latest_feed/`（GitHub Actions で実行） |
 | [.github/workflows/trend-feed.yml](.github/workflows/trend-feed.yml) | 30 分ごとの cron |
 | [scripts/c_common.py](scripts/c_common.py) / [scripts/fetch_c_authors.py](scripts/fetch_c_authors.py) / [scripts/aggregate_c.py](scripts/aggregate_c.py) | C（decisions/0006）の定義・著者取得・集計。**T_end（2026-10-02 12:10 JST 以降の最初のスナップショット）の前は、取得を拒否し、件数と時刻しか出さない** |
+| [scripts/aggregate_2b.py](scripts/aggregate_2b.py) / [scripts/make_2b_fixture.py](scripts/make_2b_fixture.py) | 2b（再取得で後期の R10 がどれだけ上がるか。decisions/0002、読み方は [0008](docs/decisions/0008-2b-implementation-readings.md)）の集計と、合成データでの検証。2 回目の取得が 2026-10-02 以降に完了するまで率を出さない |
 | [scripts/make_c_fixture.py](scripts/make_c_fixture.py) | 答えの分かっている合成データで `aggregate_c.py` を検証する（`ALL OK` で終了）。C のスクリプトは T_end の前に、合成データだけで検証した（[decisions/0007](docs/decisions/0007-c-implementation-readings.md)） |
 
 - 検証の経緯・備忘は非公開の別リポジトリにある（`ideas/` は junction で、ここには置かない）
@@ -50,7 +51,7 @@ Zenn の公開データで「**新しいツールのトピックでは、最初�
 2. ~~`python scripts/phase1.py`（一覧 約 2,000 リクエスト 35 分 → 著者 17,952 人 5 時間）~~ 2026-09-04 完了
 3. ~~撤退基準 A → B を判定し、B1〜B5 を出す~~ 2026-09-04 完了（[docs/results.md](docs/results.md)、[decisions/0002](docs/decisions/0002-phase1-verdict.md)）
 4. 記事（zenn-content 側で執筆）
-5. 2b: 2026-10-02 以降に同じ一覧を再取得し（`python scripts/fetch_topic_articles.py --out data/topics_2026-10`）、age 効果と全体低下を分ける（判定は decisions/0002 に事前登録済み。2 回の取得を比べる集計は未作成）
+5. 2b: 2026-10-02 以降に同じ一覧を再取得し（`python scripts/fetch_topic_articles.py --out data/topics_2026-10`）、→ `python scripts/aggregate_2b.py` で age 効果と全体低下を分ける（判定は decisions/0002 に事前登録済み、読み方は 0008）
 6. C: ~~2 週間分たまる前に問いと基準を登録~~ 2026-09-21 に [decisions/0006](docs/decisions/0006-c-trend-entry-registration.md) で登録（予定から 3 日遅れ、集計は未実施）。2026-10-02 以降に 28 日分で「トレンドには誰が入るか（C1）」「入口はいいね 10 より上か下か（C2）」を判定する
 
 ## 作り方（AI の利用について）

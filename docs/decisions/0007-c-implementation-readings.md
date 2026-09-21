@@ -44,5 +44,5 @@
 
 ## 影響
 
-- T_end の後の手順: `python scripts/aggregate_c.py --snapshots` → `fetch_c_authors.py`（切り離し実行、約 2 時間と推測）→ `aggregate_c.py --criteria`（件数だけ）→ `aggregate_c.py` → 判定の決定記録（**0008**）
+- T_end の後の手順: `python scripts/aggregate_c.py --snapshots` → `fetch_c_authors.py`（切り離し実行、約 2 時間と推測）→ `aggregate_c.py --criteria`（件数だけ）→ `aggregate_c.py` → 判定の決定記録（次の番号。2026-09-21 追記: 0008 は同日に 2b の読み方の固定に使ったので、C の判定は 0009 以降になる）
 - 事前登録に無い集計を足すときは、0002・0005 と同じく別ファイルの「事後の参考表」にして、判定に使わない
